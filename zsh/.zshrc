@@ -67,3 +67,34 @@ eval "$(register-python-argcomplete ros2)"
 
 # npm global packages (eas-cli, etc.)
 export PATH="$HOME/.npm-global/bin:$PATH"
+
+export EDITOR='nvim'
+
+##################### Aliases #####################
+
+# zoxide: jump to frecent dirs by substring, falls back to real cd for literal paths
+alias cd='z'
+
+# Clipboard (xclip under X11/XWayland; also what tmux's OSC52 copy lands on)
+alias pbcopy='xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+alias cpwd="pwd | tr -d '\n' | pbcopy && echo 'pwd copied to clipboard'"
+
+# fzf with a bat preview (Debian/Ubuntu ships bat as `batcat`)
+alias fzf="fzf --preview 'batcat --style=numbers --color=always --line-range=:500 {}'"
+alias fzf_vim="fzf --preview 'batcat --style=numbers --color=always --line-range=:500 {}' --bind 'enter:execute(nvim {})'"
+alias fzfc="fzf | xargs realpath | xclip -selection clipboard"
+
+# Tmux
+alias tn='tmux new-session -A -s "$(basename "$PWD")"'
+# Session switcher built on fzf-tmux (no sesh dependency) — pairs with ~/.config/tmux/tmux.conf
+ts() {
+  local session
+  session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf-tmux -p 60%,40%) || return
+  if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$session"
+  else
+    tmux attach -t "$session"
+  fi
+}
+###################################################
