@@ -13,6 +13,28 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Toggle a terminal split; hides the window but keeps the shell running
+local term_win, term_buf
+local function toggle_terminal()
+  if term_win and vim.api.nvim_win_is_valid(term_win) then
+    vim.api.nvim_win_hide(term_win)
+    term_win = nil
+    return
+  end
+  vim.cmd("botright split")
+  if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
+    vim.api.nvim_win_set_buf(0, term_buf)
+  else
+    vim.cmd("terminal")
+    term_buf = vim.api.nvim_get_current_buf()
+  end
+  term_win = vim.api.nvim_get_current_win()
+  vim.cmd("resize 15")
+  vim.cmd("startinsert")
+end
+vim.keymap.set({ "n", "t" }, "<leader>t", toggle_terminal, { desc = "Toggle terminal" })
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
 require("lazy").setup({
   { "folke/tokyonight.nvim", priority = 1000, config = function()
     vim.cmd.colorscheme("tokyonight")
@@ -50,7 +72,19 @@ require("lazy").setup({
     },
     config = function()
       require("mason").setup()
-      require("mason-lspconfig").setup()
+      require("mason-lspconfig").setup({
+        -- Several Python LSPs are installed; keep only pyright attached for .py
+        -- files so diagnostics/completions aren't duplicated across all of them.
+        automatic_enable = { exclude = { "pylsp", "pylyzer", "pytest_language_server" } },
+      })
+      -- Nvim 0.11 ships gri/grr/grt/grn by default but no plain "go to definition"
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local opts = { buffer = args.buf }
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+        end,
+      })
     end },
 
   { "hrsh7th/nvim-cmp", dependencies = { "hrsh7th/cmp-nvim-lsp", "L3MON4D3/LuaSnip" },
