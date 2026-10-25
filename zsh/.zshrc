@@ -29,6 +29,9 @@ compinit
 
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
+# Without this, "cd .."+Tab is excluded as a candidate and falls through to
+# the approximate completer, which can jump to an unrelated hidden entry.
+zstyle ':completion:*' special-dirs true
 zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' menu select=2
@@ -97,4 +100,5 @@ ts() {
 ###################################################
 
 # zoxide: must be last, so nothing sourced after it can override its hooks
+_ZO_DOCTOR=0
 eval "$(zoxide init zsh)"
