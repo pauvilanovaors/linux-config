@@ -49,9 +49,6 @@ source ~/powerlevel10k/powerlevel10k.zsh-theme
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# zoxide
-eval "$(zoxide init zsh)"
-
 # fzf
 source /usr/share/doc/fzf/examples/key-bindings.zsh
 export PATH="$HOME/.local/bin:$PATH"
@@ -98,3 +95,6 @@ ts() {
   fi
 }
 ###################################################
+
+# zoxide: must be last, so nothing sourced after it can override its hooks
+eval "$(zoxide init zsh)"
